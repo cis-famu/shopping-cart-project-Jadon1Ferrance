@@ -1,0 +1,150 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+using namespace std;
+
+const string CUSTOMERNAME = "Jack Smith", USERNAME = "jsmith", PASSWORD = "black123",
+    ACCOUNTNUMBER = "123456789", MEMBERLEVEL = "Gold", ADDRESS = "100 W New Haven Ave, Melbourne, FL, 32901";
+double storeCredit = 3000.00; // the available store credit
+const int ITEMS = 3; // number of items for sale
+const double SALES_TAX = 6; // sales tax percent
+string sku[] = {"HF-342", "LK-322", "KF-231"};
+string name[] = {"1/2 in Bolt", "1/4 in Nail", "Hammer"};
+int itemsInUnit[] = {50, 25, 1};
+double pricePerUnit[] = {20.00, 5.75, 15.23};
+int quantityOnHand[] = {200, 76, 100};
+double discount = 0.0;
+
+float getEstimate( string memberLevel, float pricePerUnit, int noUnits ) {
+    float priceWithoutTax = pricePerUnit * noUnits;
+    float totalSpend = priceWithoutTax*0.06 + priceWithoutTax;
+    
+    float discountPercent;
+    
+    if( memberLevel == "Diamond" ) {
+        if( totalSpend > 700.0 ) {
+            discountPercent = 0.12;
+        } else if( totalSpend > 300.0 ) {
+            discountPercent = 0.0825;
+        } else if( totalSpend > 100.0 ) {
+            discountPercent = 0.06;
+        }
+    } else if( memberLevel == "Gold" ) {
+        if( totalSpend > 300.0 ) {
+            discountPercent = 0.0825;
+        } else if( totalSpend > 100.0 ) {
+            discountPercent = 0.06;
+        }
+    } else if( memberLevel == "Blue" ) {
+        if( totalSpend > 100.0 ) {
+            discountPercent = 0.06;
+        }
+    } else {
+        discountPercent = 0;
+    }
+    
+    discount = totalSpend*discountPercent;
+    
+    float finalCost = totalSpend - discount;
+    
+    return finalCost;
+}
+int main()
+{
+    string input_username, input_password, input_sku;
+    int input_qty;
+    int itemIndex;
+    
+    double amount, salesTax, totalDue;
+    cout << right << setw(20) << " LOGIN" << endl;
+    cout << "Username: ";
+    cin >> input_username;
+    cout << "Password: ";
+    cin >> input_password;
+    
+    if(input_username == USERNAME && input_password == PASSWORD)
+    {
+        // after Login section
+        afterLogin:
+        
+        cout << endl << right << setw(30) << "ITEMS" << endl;
+        cout << left << setw(10) << "SKU" << left << setw(20) << "Name" << right << setw(15) << "Items in unit"
+        << right << setw(20) << "Price per unit" << right << setw(20) << "Quantity on hand" << endl;
+        cout << fixed << setprecision(2);
+        
+        for(int i=0;i<ITEMS;i++)
+        {
+            cout << left << setw(10) << sku[i] << left << setw(20) << name[i] << right << setw(10) << itemsInUnit[i]
+            << right << setw(20) << pricePerUnit[i] << right << setw(20) << quantityOnHand[i] << endl;
+        }
+        
+        cout << endl << "Enter the SKU of the item to get an get estimate: ";
+        cin >> input_sku;
+        itemIndex = -1;
+        
+        for(int i=0;i<ITEMS;i++)
+        {
+            if(sku[i] == input_sku)
+            {
+                itemIndex = i;
+                break;
+            }
+        }
+        
+        if(itemIndex == -1) // invalid sku, display error and exit
+            cout << "ERROR: Invalid SKU!!!! Terminating the program..." << endl;
+        else
+        {
+            cout << "Enter the quantity to get an estimate: ";
+            cin >> input_qty;
+            if(input_qty < 1 || input_qty > quantityOnHand[itemIndex])
+                cout << "ERROR: Insufficient quantity. Quantity must be between [1, " << quantityOnHand[itemIndex] << "]. Terminating the program..." << endl;
+            else
+            {   
+                amount = input_qty * pricePerUnit[itemIndex];
+                totalDue = getEstimate(MEMBERLEVEL, pricePerUnit[itemIndex], input_qty);
+                salesTax = (amount * SALES_TAX)/100;
+                
+                cout << endl << "*********************** ESTIMATE **************************" << endl;
+                cout << left << setw(20) << "Customer Name" << ": " << CUSTOMERNAME << endl;
+                cout << left << setw(20) << "Account Number" << ": " << ACCOUNTNUMBER << endl;
+                cout << left << setw(20) << "Member Level" << ": " << MEMBERLEVEL << endl;
+                cout << left << setw(20) << "Address" << ": " << ADDRESS << endl;
+                cout << "=========================================================================" << endl;
+                cout << left << setw(20) << "Item SKU" << ": " << input_sku << endl;
+                cout << left << setw(20) << "Item Name" << ": " << name[itemIndex] << endl;
+                cout << left << setw(20) << "Items in unit" << ": " << right << setw(10) << itemsInUnit[itemIndex] << endl;
+                cout << left << setw(20) << "Price per unit" << ": $" << right << setw(8) << pricePerUnit[itemIndex] << endl;
+                cout << left << setw(20) << "Quantity" << ":" << right << setw(10) << input_qty << endl;
+                cout << left << setw(20) << "Gross Amount" << ": $" << right << setw(8) << amount << endl;
+                cout << left << setw(20) << "Sales Tax" << ": $" << right << setw(8) << salesTax << endl;
+                cout << left << setw(20) << "Discount" << ": $" << right << setw(8) << discount << endl;
+                cout << left << setw(20) << "Total Amount" << ": $" << right << setw(8) << totalDue << endl;
+                cout << left << setw(20) << "Store Credit" << ": $" << right << setw(8) << storeCredit << endl;
+                cout << endl << "**** Thank you. Have a nice day! ****" << endl;
+                
+                // ask the customer if he wants to purchase more items
+                string response;
+                cout << "Want to get more estimate of items? (y/n) : ";
+                cin >> response;
+                
+                // if yes, then redirect him to after login menu
+                if( response == "y" ) {
+                    // send the cusomer to start of the program in the after login menu
+                    goto afterLogin;
+                }
+                else if( response == "n" ) {
+                    cout << "Thanks you! "<< endl;
+                } else {
+                    cout << "Wrong Input! Terminating the program..." << endl;
+                }
+                
+                
+            }
+        }
+    }
+    else
+        cout << "ERROR: Invalid USERNAME and/or PASSWORD. " << endl;
+    
+    return 0;
+}
